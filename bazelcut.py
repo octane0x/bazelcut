@@ -3,7 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["yt-dlp[default]"]
 # ///
-"""ytcortes: baixa 1 vídeo e entrega um .zip com um arquivo por corte (início, fim, título)."""
+"""bazelcut: baixa 1 vídeo e entrega um .zip com um arquivo por corte (início, fim, título)."""
 
 import argparse
 import os
@@ -20,10 +20,10 @@ import yt_dlp
 
 EXEMPLOS = """\
 exemplos:
-  ytcortes LINK cortes.txt        tempos num arquivo
-  ytcortes cortes.txt             link dentro do próprio arquivo
-  ytcortes LINK                   cola os tempos no terminal e aperta Ctrl-D
-  ytcortes -a LINK cortes.txt     só áudio (mp3)
+  bazelcut LINK cortes.txt        tempos num arquivo
+  bazelcut cortes.txt             link dentro do próprio arquivo
+  bazelcut LINK                   cola os tempos no terminal e aperta Ctrl-D
+  bazelcut -a LINK cortes.txt     só áudio (mp3)
 
 uma linha por corte: início, fim e título (h:mm:ss ou mm:ss; fração com . ou ,):
   00:00 - 03:45 Intro
@@ -49,7 +49,7 @@ class Corte(NamedTuple):
 
 
 def falhar(msg):
-    sys.exit(f'ytcortes: {msg}')
+    sys.exit(f'bazelcut: {msg}')
 
 
 def segundos(m):
@@ -174,7 +174,7 @@ def gerar_zip(video, cortes, pasta, album, audio):
 
 def main():
     ap = argparse.ArgumentParser(
-        prog='ytcortes', epilog=EXEMPLOS, formatter_class=argparse.RawDescriptionHelpFormatter,
+        prog='bazelcut', epilog=EXEMPLOS, formatter_class=argparse.RawDescriptionHelpFormatter,
         description='Baixa 1 vídeo (YouTube ou outro site do yt-dlp) e entrega um .zip com um arquivo por corte.')
     ap.add_argument('entrada', nargs='*', metavar='LINK|ARQUIVO',
                     help='link do vídeo e/ou arquivo com os tempos; sem arquivo, lê os tempos da entrada padrão')
@@ -199,7 +199,7 @@ def main():
         print(f'  {hms(c.inicio):>10} → {hms(c.fim):<10} {c.titulo}', file=sys.stderr)
 
     # temporário ao lado do zip (disco), não em /tmp (tmpfs = RAM)
-    with tempfile.TemporaryDirectory(prefix='.ytcortes-', dir=pasta) as tmp:
+    with tempfile.TemporaryDirectory(prefix='.bazelcut-', dir=pasta) as tmp:
         opcoes = {
             'noplaylist': True,
             'format': 'bestaudio/best' if args.audio else 'bv*+ba/b',
@@ -231,8 +231,8 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('\nytcortes: cancelado', file=sys.stderr)
+        print('\nbazelcut: cancelado', file=sys.stderr)
         sys.exit(130)
     except yt_dlp.utils.DownloadError:
-        sys.exit('ytcortes: o yt-dlp falhou (erro acima). Se o YouTube mudou algo, atualize o yt-dlp:\n'
+        sys.exit('bazelcut: o yt-dlp falhou (erro acima). Se o YouTube mudou algo, atualize o yt-dlp:\n'
                  f'  uv run -U --script {Path(__file__).resolve()} -h')
